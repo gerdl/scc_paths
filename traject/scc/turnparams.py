@@ -39,16 +39,16 @@ class TurnParams(object):
         x_qi = self.state_qi[0]
         y_qi = self.state_qi[1]
         xo = x_qi - math.sin(self.state_qi[2]) / self.kappa_max
-        yo = y_qi - math.cos(self.state_qi[2]) / self.kappa_max
+        yo = y_qi + math.cos(self.state_qi[2]) / self.kappa_max
         return xo, yo
 
     @cached_property
     def state_qi(self):
-        scale = math.sqrt(math.pi / self.params.sigma_max)
+        """Where the first clothoid intersects the inner circle"""
+        scale = math.sqrt(math.pi / self.sigma_max)
 
-        ssa_csa = scale * scipy.special.fresnel(math.sqrt(self.delta_min/math.pi))
+        ssa_csa = scipy.special.fresnel(math.sqrt(self.delta_min/math.pi))
         theta = self.delta_min / 2
         kappa = self.kappa_max
 
-        return ssa_csa[1], ssa_csa[0], theta, kappa
-.
+        return scale*ssa_csa[1], scale*ssa_csa[0], theta, kappa

@@ -8,6 +8,7 @@ import math
 from property_manager import cached_property
 
 import scipy.special
+import numpy as np
 
 
 class Turn(object):
@@ -31,7 +32,7 @@ class Turn(object):
         assert(_delta > _params.delta_min)
         assert (_delta < 2 * math.pi)
 
-    def state(self, time):
+    def state(self, s):
         """
         Returns
         -------
@@ -44,28 +45,37 @@ class Turn(object):
 
         Parameters
         ----------
-            time : float
+            s : float
+                the 1-d position along the turn path
 
         """
         pass
 
-    def state_circular(self, time):
+    def state_circular(self, s):
         pass
 
-    def state_clothoid_first(self, time):
+    def state_clothoid_first(self, s):
         """
         Parameters
         ----------
-        time : float
+        s : np.array
         """
-        assert(time >= 0)
-        assert(time <= self.params.delta_min / 2)
+        assert((s >= 0).all())
+        assert((s <= self.params.len_clothoid_part).all())
 
         scale = math.sqrt(math.pi / self.params.sigma_max)
 
-        xy = scale * scipy.special.fresnel(math.sqrt())
-        theta =
-        kappa =
+        # TODO: I think something's still wrong here!
+        ssa_csa = scipy.special.fresnel(s * math.sqrt(1 / (self.params.delta_min * math.pi)))
+
+        # TODO: I think something's still wrong here!
+        # theta changes quadratically with s
+        theta = s*s/(2*self.params.delta_min)
+
+        # curvature changes linear until reaching kappa_max for s=len_clothoid_part
+        kappa = s/self.params.len_clothoid_part * self.params.kappa_max
+
+        return scale*ssa_csa[1], scale*ssa_csa[0], theta, kappa
 
 
     @cached_property
