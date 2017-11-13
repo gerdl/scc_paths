@@ -52,7 +52,20 @@ class Turn(object):
         pass
 
     def state_circular(self, s):
-        pass
+        # TODO: Fix the two-clothoids-only case:
+        assert (self.delta > self.params.delta_min)
+
+        assert ((s >= self.params.len_clothoid_part).all())
+        assert ((s <= self.params.len_clothoid_part + self.len_of_circular_part).all())
+
+        angular_segment = self.delta - self.params.delta_min
+        start_angle = self.params.delta_min / 2.0
+        angles = start_angle + (s - self.params.len_clothoid_part) / self.len_of_circular_part * angular_segment
+        x = self.params.omega[0] + self.params.inner_rad * np.sin(angles)
+        y = self.params.omega[1] - self.params.inner_rad * np.cos(angles)
+        kappa = np.full([len(s)], self.params.kappa_max)
+
+        return x, y, angles, kappa
 
     def state_clothoid_first(self, s):
         """
@@ -77,13 +90,19 @@ class Turn(object):
 
         return scale*ssa_csa[1], scale*ssa_csa[0], theta, kappa
 
-
     @cached_property
     def len_of_turn(self):
         pass
 
+    @cached_property
     def len_of_circular_part(self):
+        # circumference = 2*pi*r
+        # angular_fraction = 2*pi / (delta - delta_min)
 
-        theta_circ = self.delta - self.params.delta_min
+        angular_fraction = (self.delta - self.params.delta_min) / (2*math.pi)
+        if angular_fraction < 0:
+            return 0
+
+        return 2 * math.pi * self.params.inner_rad * angular_fraction
 
 

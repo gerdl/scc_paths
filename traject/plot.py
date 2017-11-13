@@ -28,24 +28,30 @@ fig, ax = plt.subplots(figsize=(8, 8))
 
 
 
-tp = TurnParams(1.0, 1.0)
-turn = Turn(tp, math.pi, 1)
+tparam = TurnParams(1.0, 1.0)
+turn = Turn(tparam, math.pi*0.5, 1)
 
 # plot outer circle:
-omega = tp.omega
-ax.add_patch(Circle(omega, tp.outer_rad, facecolor='none', edgecolor='black'))
+omega = tparam.omega
+ax.add_patch(Circle(omega, tparam.outer_rad, facecolor='none', edgecolor='black'))
 
 # plot inner circle center point:
-ax.add_patch(Circle(omega, tp.inner_rad))
+ax.add_patch(Circle(omega, tparam.inner_rad))
 plt.plot(omega[0], omega[1], "x", color='black')
 
 # plot arc segment
-X = np.linspace(0, tp.len_clothoid_part, 500, endpoint=True)
+X = np.linspace(0, tparam.len_clothoid_part, 128, endpoint=True)
 tra = turn.state_clothoid_first(X)
 plt.plot(tra[0], tra[1], color="red", linewidth=1.0, linestyle="-")
 
+# plot circle arc segment:
+X2 = np.linspace(tparam.len_clothoid_part, tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
+tra = turn.state_circular(X2)
+plt.plot(tra[0], tra[1], color="cyan", linewidth=2.0, linestyle="-")
+
 # plot qi point:
-plt.plot(tp.state_qi[0], tp.state_qi[1], "go")
+plt.plot(tparam.state_qi[0], tparam.state_qi[1], "go")
+
 
 # Set x limits, ticks, etc.
 plt.xlim(-4.0, 4.0)
