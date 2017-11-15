@@ -6,6 +6,8 @@ from property_manager import cached_property
 import scipy.special
 import math
 
+from . import State
+
 
 class TurnParams(object):
     """ rather abstract curve parameters that hold for any delta and direction """
@@ -36,10 +38,10 @@ class TurnParams(object):
     @cached_property
     def omega(self):
         """The position of the center of the outer/inner circle."""
-        x_qi = self.state_qi[0]
-        y_qi = self.state_qi[1]
-        xo = x_qi - math.sin(self.state_qi[2]) / self.kappa_max
-        yo = y_qi + math.cos(self.state_qi[2]) / self.kappa_max
+        x_qi = self.state_qi.x
+        y_qi = self.state_qi.y
+        xo = x_qi - math.sin(self.state_qi.theta) / self.kappa_max
+        yo = y_qi + math.cos(self.state_qi.theta) / self.kappa_max
         return xo, yo
 
     @cached_property
@@ -51,4 +53,16 @@ class TurnParams(object):
         theta = self.delta_min / 2
         kappa = self.kappa_max
 
-        return scale*ssa_csa[1], scale*ssa_csa[0], theta, kappa
+        st = State(
+            _x=scale*ssa_csa[1],
+            _y=scale*ssa_csa[0],
+            _theta=theta,
+            _kappa=kappa
+        )
+        return st
+
+    @cached_property
+    def gamma(self):
+        """The angle between the outer circle tangent and the start/end vector."""
+        gamma = math.atan(self.omega[0]/self.omega[1])
+        return gamma
