@@ -139,7 +139,7 @@ class Turn(object):
         ssa_csa = scipy.special.fresnel(inv_clothoid_s * math.sqrt(1 / (self.params.delta_min * math.pi)))
 
         # theta changes quadratically with s
-        theta = inv_clothoid_s * inv_clothoid_s / (2 * self.params.delta_min)
+        theta = - inv_clothoid_s * inv_clothoid_s / (2 * self.params.delta_min)
 
         # curvature changes linear until reaching kappa_max for s=len_clothoid_part
         kappa = inv_clothoid_s / self.params.len_clothoid_part * self.params.kappa_max
