@@ -16,23 +16,25 @@ from traject.scc import State
 class Turn(object):
     """This generates a turn that is always starting from angle 0, turning to an angle _delta"""
 
-    def __init__(self, _params, _delta, _dir):
+    def __init__(self, _params, _delta):
         """
         Parameters
         ----------
             _params : TurnParams
             _delta : float
-                Deflection of th Turn
+                Deflection of th Turn; positive = left turn, negative = right turn
             _dir : int
                 1 for left turn, -1 for right turn
         """
 
         self.params = _params
-        self.delta = _delta
-        self.dir = _dir
+        self.delta = math.fabs(_delta)
+        self.dir = 1
+        if _delta < 0:
+            self.dir = -1
 
-        assert(_delta > _params.delta_min)
-        assert (_delta < 2 * math.pi)
+        assert(self.delta > _params.delta_min)
+        assert (self.delta < 2 * math.pi)
 
     def state(self, s):
         """
@@ -62,27 +64,27 @@ class Turn(object):
         theta = np.empty(len(s))
         kappa = np.empty(len(s))
 
-        first_clotho = self.state_clothoid_first(s[first_clotho_cond])
+        first_clotho = self._state_clothoid_first(s[first_clotho_cond])
         x[first_clotho_cond] = first_clotho.x
         y[first_clotho_cond] = first_clotho.y
         theta[first_clotho_cond] = first_clotho.theta
         kappa[first_clotho_cond] = first_clotho.kappa
 
-        circ_seg = self.state_circular(s[circ_seg_cond])
+        circ_seg = self._state_circular(s[circ_seg_cond])
         x[circ_seg_cond] = circ_seg.x
         y[circ_seg_cond] = circ_seg.y
         theta[circ_seg_cond] = circ_seg.theta
         kappa[circ_seg_cond] = circ_seg.kappa
 
-        second_clotho = self.state_clothoid_second(s[second_clotho_cond])
+        second_clotho = self._state_clothoid_second(s[second_clotho_cond])
         x[second_clotho_cond] = second_clotho.x
         y[second_clotho_cond] = second_clotho.y
         theta[second_clotho_cond] = second_clotho.theta
         kappa[second_clotho_cond] = second_clotho.kappa
 
-        return State(x, y, theta, kappa)
+        return State(x, self.dir * y, self.dir * theta, self.dir * kappa)
 
-    def state_circular(self, s):
+    def _state_circular(self, s):
         # TODO: Fix the two-clothoids-only case:
         assert (self.delta > self.params.delta_min)
 
@@ -98,8 +100,9 @@ class Turn(object):
 
         return State(x, y, angles, kappa)
 
-    def state_clothoid_first(self, s):
-        """
+    def _state_clothoid_first(self, s):
+        """ left turn, first clothoid segment
+
         Parameters
         ----------
         s : np.array
@@ -121,7 +124,7 @@ class Turn(object):
 
         return State(scale*ssa_csa[1], scale*ssa_csa[0], theta, kappa)
 
-    def state_clothoid_second(self, s):
+    def _state_clothoid_second(self, s):
         """
         Parameters
         ----------
@@ -145,9 +148,8 @@ class Turn(object):
         kappa = inv_clothoid_s / self.params.len_clothoid_part * self.params.kappa_max
 
         state = State(-scale * ssa_csa[1], scale * ssa_csa[0], theta, kappa)
-        state = state.rotate_then_translate(self.delta, self.state_qg.x,  self.state_qg.y)
+        state = state.rotate_then_translate(self.delta, self._state_qg.x,  self._state_qg.y)
         return state
-
 
     @cached_property
     def len(self):
@@ -165,8 +167,17 @@ class Turn(object):
         return 2 * math.pi * self.params.inner_rad * angular_fraction
 
     @cached_property
-    def state_qj(self):
-        """Where the inner circle segment intersects the second clothoid"""
+    def state_qi(self):
+        """Where the first clothoid intersects the inner circle (l/r-turn)"""
+        st = self.params.state_qi
+        st.y *= self.dir
+        st.theta *= self.dir
+        st.kappa *= self.dir
+        return st
+
+    @cached_property
+    def _state_qj(self):
+        """Where the inner circle segment intersects the second clothoid (left-turn)"""
 
         ang = self.delta - self.params.delta_min/2
         x = self.params.omega[0] + self.params.inner_rad * np.sin(ang)
@@ -176,10 +187,29 @@ class Turn(object):
         return State(x, y, ang, kappa)
 
     @cached_property
+    def state_qj(self):
+        """Where the inner circle segment intersects the second clothoid (l/r-turn)"""
+        st = self._state_qj
+        st.y *= self.dir
+        st.theta *= self.dir
+        st.kappa *= self.dir
+        return st
+
+    @cached_property
     def state_qg(self):
-        """The end of the second clothoid"""
+        """The end of the second clothoid (turn left | right for dir=1 | -1)"""
+        st = self._state_qg
+        st.y *= self.dir
+        st.theta *= self.dir
+        st.kappa *= self.dir
+        return st
+
+    @cached_property
+    def _state_qg(self):
+        """The end of the second clothoid (left-turn)"""
 
         st = State(-self.params.omega[0], -self.params.omega[1], self.delta, 0)
-        st = st.rotate_then_translate(self.delta+2*self.params.gamma, self.params.omega[0], self.params.omega[1])
+        st = st.rotate_then_translate(self.delta + 2 * self.params.gamma, self.params.omega[0], self.params.omega[1])
 
         return st
+

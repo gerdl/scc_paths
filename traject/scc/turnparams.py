@@ -33,11 +33,11 @@ class TurnParams(object):
 
     @cached_property
     def outer_rad(self):
-        return math.sqrt(self.omega[0]*self.omega[0] + self.omega[1]*self.omega[1])
+        return math.sqrt(self.omega[0] * self.omega[0] + self.omega[1] * self.omega[1])
 
     @cached_property
     def omega(self):
-        """The position of the center of the outer/inner circle."""
+        """The position of the center of the outer/inner circle.  (left-turn)"""
         x_qi = self.state_qi.x
         y_qi = self.state_qi.y
         xo = x_qi - math.sin(self.state_qi.theta) / self.kappa_max
@@ -45,8 +45,14 @@ class TurnParams(object):
         return xo, yo
 
     @cached_property
+    def omega_r(self):
+        """The position of the center of the outer/inner circle of a right-turn."""
+        xo, yo = self.omega
+        return xo, -yo
+
+    @cached_property
     def state_qi(self):
-        """Where the first clothoid intersects the inner circle"""
+        """Where the first clothoid intersects the inner circle (left-turn)"""
         scale = math.sqrt(math.pi / self.sigma_max)
 
         ssa_csa = scipy.special.fresnel(math.sqrt(self.delta_min/math.pi))
@@ -62,7 +68,14 @@ class TurnParams(object):
         return st
 
     @cached_property
+    def state_qi_r(self):
+        """Where the first clothoid intersects the inner circle in a right-turn"""
+        s = self.state_qi
+        s.y *= -1
+        return s
+
+    @cached_property
     def gamma(self):
         """The angle between the outer circle tangent and the start/end vector."""
-        gamma = math.atan(self.omega[0]/self.omega[1])
+        gamma = math.atan(self.omega[0] / self.omega[1])
         return gamma

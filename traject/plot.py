@@ -26,7 +26,7 @@ ax1.set_label("s-theta")
 
 
 tparam = TurnParams(1.0, 1.0)
-turn = Turn(tparam, math.pi*1.0, 1)
+turn = Turn(tparam, math.pi*1.0)
 
 # plot outer circle:
 omega = tparam.omega
@@ -43,16 +43,16 @@ ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
 
 # plot arc segment
 X = np.linspace(0, tparam.len_clothoid_part, 128, endpoint=True)
-tra = turn.state_clothoid_first(X)
+tra = turn._state_clothoid_first(X)
 ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
 
 # plot circle arc segment:
 X2 = np.linspace(tparam.len_clothoid_part, tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
-tra = turn.state_circular(X2)
+tra = turn._state_circular(X2)
 ax0.plot(tra.x, tra.y, color="cyan", linewidth=2.0, linestyle="-")
 
 # plot qi point:
-ax0.plot(tparam.state_qi.x, tparam.state_qi.y, "go")
+ax0.plot(turn.state_qi.x, turn.state_qi.y, "go")
 
 # plot qj point:
 ax0.plot(turn.state_qj.x, turn.state_qj.y, "ro")
@@ -62,7 +62,7 @@ ax0.plot(turn.state_qg.x, turn.state_qg.y, "bo")
 
 # plot second clothoid:
 X3 = np.linspace(tparam.len_clothoid_part+turn.len_of_circular_part, 2*tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
-tra = turn.state_clothoid_second(X3)
+tra = turn._state_clothoid_second(X3)
 ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
 
 # Set x limits, ticks, etc.
