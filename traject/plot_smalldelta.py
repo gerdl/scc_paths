@@ -24,7 +24,8 @@ ax0.set_label("x-y")
 
 
 tparam = TurnParams(1.0, 1.0)
-DELTA = math.pi/8
+# DELTA = math.pi/8
+DELTA = tparam.delta_min*0.9
 
 turn = Turn(tparam, DELTA)
 
@@ -37,18 +38,18 @@ ax0.plot(omega[0], omega[1], "x", color='black')
 
 # plot whole line
 XT = np.linspace(0, turn.len, 128, endpoint=True)
-tra = turn.state(XT)
-ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
+tra1 = turn.state(XT)
+ax0.plot(tra1.x, tra1.y, color="yellow", linewidth=5.0, linestyle="-")
 
 # plot arc segment 1
 X = np.linspace(0, turn._len_clothoid_part_smalldelta, 128, endpoint=True)
-tra = turn._state_clothoid_smalldelta_first(X)
-ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
+tra2 = turn._state_clothoid_smalldelta_first(X)
+ax0.plot(tra2.x, tra2.y, color="red", linewidth=1.0, linestyle="-")
 
 # plot arc segment 2
 X = np.linspace(turn._len_clothoid_part_smalldelta, 2*turn._len_clothoid_part_smalldelta, 128, endpoint=True)
-tra = turn._state_clothoid_smalldelta_second(X)
-ax0.plot(tra.x, tra.y, color="green", linewidth=1.0, linestyle="-")
+tra3 = turn._state_clothoid_smalldelta_second(X)
+ax0.plot(tra3.x, tra3.y, color="green", linewidth=1.0, linestyle="-")
 
 
 # plot qg point:

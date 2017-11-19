@@ -233,8 +233,8 @@ class Turn(object):
         assert((s <= self._len_clothoid_part_smalldelta * 2).all())
 
         # original segments: s \in lp .. 2*lp
-        # transform s: for the second clotho part go from 0 to lp
-        my_s = s - self._len_clothoid_part_smalldelta
+        # transform s: for the second clotho part go from lp to 0
+        my_s = 2*self._len_clothoid_part_smalldelta - s
 
         scale = math.sqrt(math.pi / self._sigma_smalldelta)
 
