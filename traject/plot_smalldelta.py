@@ -12,29 +12,25 @@ import scipy.special
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from traject.scc.turn import Turn
 from traject.scc.turnparams import TurnParams
+from traject.scc.turn import Turn
 
-
-DELTA = 1.7
 
 # Create a new subplot from a grid of 3x3
 gs = GridSpec(3, 3)
 fig = plt.figure(figsize=(8, 14))
-ax0 = fig.add_subplot(gs[:-1, :])
+ax0 = fig.add_subplot(gs[:, :])
 ax0.set_label("x-y")
-
-ax1 = fig.add_subplot(gs[-1, :])
-ax1.set_label("s-theta")
 
 
 tparam = TurnParams(1.0, 1.0)
+DELTA = math.pi/8
+
 turn = Turn(tparam, DELTA)
 
 # plot outer circle:
 omega = tparam.omega
 ax0.add_patch(Circle(omega, tparam.outer_rad, facecolor='none', edgecolor='black'))
-
 # plot inner circle center point:
 ax0.add_patch(Circle(omega, tparam.inner_rad))
 ax0.plot(omega[0], omega[1], "x", color='black')
@@ -44,29 +40,23 @@ XT = np.linspace(0, turn.len, 128, endpoint=True)
 tra = turn.state(XT)
 ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
 
-# plot arc segment
-X = np.linspace(0, tparam.len_clothoid_part, 128, endpoint=True)
-tra = turn._state_clothoid_first(X)
+# plot arc segment 1
+X = np.linspace(0, turn._len_clothoid_part_smalldelta, 128, endpoint=True)
+tra = turn._state_clothoid_smalldelta_first(X)
 ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
 
-# plot circle arc segment:
-X2 = np.linspace(tparam.len_clothoid_part, tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
-tra = turn._state_circular(X2)
-ax0.plot(tra.x, tra.y, color="cyan", linewidth=2.0, linestyle="-")
+# plot arc segment 2
+X = np.linspace(turn._len_clothoid_part_smalldelta, 2*turn._len_clothoid_part_smalldelta, 128, endpoint=True)
+tra = turn._state_clothoid_smalldelta_second(X)
+ax0.plot(tra.x, tra.y, color="green", linewidth=1.0, linestyle="-")
 
-# plot qi point:
-ax0.plot(turn.state_qi.x, turn.state_qi.y, "go")
-
-# plot qj point:
-ax0.plot(turn.state_qj.x, turn.state_qj.y, "ro")
 
 # plot qg point:
 ax0.plot(turn.state_qg.x, turn.state_qg.y, "bo")
 
-# plot second clothoid:
-X3 = np.linspace(tparam.len_clothoid_part+turn.len_of_circular_part, 2*tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
-tra = turn._state_clothoid_second(X3)
-ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
+# plot qi point:
+ax0.plot(turn.state_qi.x, turn.state_qi.y, "bo")
+
 
 # Set x limits, ticks, etc.
 ax0.set_xlim(-4.0, 4.0)
@@ -74,14 +64,6 @@ ax0.set_xticks(np.linspace(-4, 4, 9, endpoint=True))
 ax0.set_ylim(-4.0, 4.0)
 ax0.set_yticks(np.linspace(-4, 4, 9, endpoint=True))
 
-
-# -----------------------------------
-# plot whole line
-XT = np.linspace(0, turn.len, 128, endpoint=True)
-tra = turn.state(XT)
-ax1.plot(XT, tra.theta, color="black", linewidth=1.0, linestyle="-", label="theta")
-ax1.plot(XT, tra.kappa, color="red", linewidth=1.0, linestyle="-", label="kappa")
-ax1.legend()
 
 
 # Show result on screen
