@@ -40,8 +40,8 @@ class Turn(object):
         """
         Returns
         -------
-            tuple
-                a 4-tuple of:
+            State
+                includes :
                 - position x,
                 - position y,
                 - angle theta

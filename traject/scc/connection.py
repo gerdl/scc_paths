@@ -6,6 +6,7 @@ import math
 
 from property_manager import cached_property
 
+from traject.scc.helpers import calc_ang
 from .state import State
 from .turnparams import TurnParams
 
@@ -56,6 +57,12 @@ class Connection(object):
         dy = self.om2r[1] - self.om1l[1]
         dist = math.sqrt(dx**2 + dy**2)
         return dist
+
+    @cached_property
+    def lsr_om1om2_ang(self):
+        dx = self.om2r[0] - self.om1l[0]
+        dy = self.om2r[1] - self.om1l[1]
+        return calc_ang(dx, dy)
 
     @cached_property
     def lsr_alpha2(self):
