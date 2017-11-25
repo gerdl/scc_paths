@@ -246,7 +246,7 @@ class Turn(object):
         kappa = my_s * self._sigma_smalldelta
 
         st = State(-scale * ssa_csa[1], scale * ssa_csa[0], theta, kappa)
-        st = st.rotate_then_translate(self.delta, self.state_qg.x, self.state_qg.y)
+        st = st.rotate_then_translate(self.delta, self._state_qg.x, self._state_qg.y)
         return st
 
     @cached_property

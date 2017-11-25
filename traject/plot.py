@@ -18,7 +18,6 @@ from traject.scc.turnparams import TurnParams
 
 
 DELTA = random.uniform(-2*math.pi, 2*math.pi)
-# DELTA = -1.5
 print("This delta is "+str(DELTA))
 
 # Create a new subplot from a grid of 3x3
