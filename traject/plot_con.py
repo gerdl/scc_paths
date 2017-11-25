@@ -63,14 +63,14 @@ ax0.text(sccp.om2l[0], sccp.om2l[1], "om2l")
 #ax0.set_ylim(-2.0, YPOS+2)
 
 # plot first arc
-X = np.linspace(0, sccp.lsr_turn1.len, 128, endpoint=True)
-tra = sccp.lsr_turn1.state(X)
-ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
+#X = np.linspace(0, sccp.lsr_turn1.len, 128, endpoint=True)
+#tra = sccp.lsr_turn1.state(X)
+#ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
 
 # plot second arc
-X = np.linspace(0, sccp.lsr_turn2.len, 128, endpoint=True)
-tra = sccp.state_turn2(X)
-ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
+#X = np.linspace(0, sccp._lsr_turn2.len, 128, endpoint=True)
+#tra = sccp._state_turn2(X)
+#ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
 
 # connection line:
 qg1 = sccp.lsr_q1
@@ -79,6 +79,11 @@ ax0.add_line(Line2D([qg1.x, qg2.x], [qg1.y, qg2.y]))
 
 # plot pos2:
 ax0.plot(pos2.x, pos2.y, "bx")
+
+# plot the whole thing:
+X = np.linspace(0, sccp.len, 128, endpoint=True)
+tra = sccp.state(X)
+ax0.plot(tra.x, tra.y, color="yellow", linewidth=5.0, linestyle="-")
 
 print("lsr_om12_ang: "+str(sccp.lsr_om12_ang))
 print("turn2_ang: "+str(sccp.turn2_ang))

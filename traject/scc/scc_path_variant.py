@@ -12,7 +12,7 @@ from .state import State
 from .turnparams import TurnParams
 
 from enum import Enum
-
+import numpy as np
 
 class SccType(Enum):
     lsl = 1,
@@ -112,6 +112,12 @@ class SccPathVariant(object):
         return self.lsr_om12_ang + self.lsr_alpha2
 
     @cached_property
+    def lsr_q12_len(self):
+        dx = self.lsr_q2.x - self.lsr_q1.x
+        dy = self.lsr_q2.y - self.lsr_q1.y
+        return math.sqrt(dx*dx + dy*dy)
+
+    @cached_property
     def turn1_ang(self):
         ang = self.lsr_q12_ang - self.st1.theta
         return ang % (2*math.pi)        # make angle positive
@@ -123,10 +129,16 @@ class SccPathVariant(object):
 
     @cached_property
     def lsr_turn1(self):
+        """
+
+        Returns
+        -------
+        Turn
+        """
         return Turn(self.params, self.turn1_ang)
 
     @cached_property
-    def lsr_turn2(self):
+    def _lsr_turn2(self):
         """
         maybe shouldn't be used directly - not yet translated and turned!
         """
@@ -139,8 +151,62 @@ class SccPathVariant(object):
 
     @cached_property
     def lsr_q2(self):
-        qg2 = self.lsr_turn2.state_qg.rotate_then_translate(self.st2.theta+math.pi, self.st2.x, self.st2.y)
+        qg2 = self._lsr_turn2.state_qg.rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
         return qg2
 
-    def state_turn2(self, s):
-        return self.lsr_turn2.state(s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+    def _state_turn2(self, s):
+
+        # map s from [len_total-len_arc2 .. len_total] to [len_arc2 .. 0]
+        my_s = - (s - self.len)
+        return self._lsr_turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+
+    def _state_straight(self, s):
+        # map s from [len_arc1 .. len_arc1+lsr_q12_len] to [0 .. 1]
+        my_s = (s - self.lsr_turn1.len) / self.lsr_q12_len
+        dx = self.lsr_q2.x - self.lsr_q1.x
+        dy = self.lsr_q2.y - self.lsr_q1.y
+
+        x = self.lsr_q1.x + dx * my_s
+        y = self.lsr_q1.y + dy * my_s
+        theta = np.full(len(s), self.lsr_q1.theta)
+        kappa = np.zeros(len(s))
+
+        return State(x, y, theta, kappa)
+
+    @cached_property
+    def len(self):
+        return self.lsr_turn1.len + self._lsr_turn2.len + self.lsr_q12_len
+
+    def state(self, s):
+        x = np.empty(len(s))
+        y = np.empty(len(s))
+        theta = np.empty(len(s))
+        kappa = np.empty(len(s))
+
+        arc1_cond = s < self.lsr_turn1.len
+        straight_cond = (s > self.lsr_turn1.len) & \
+                        (s < self.lsr_turn1.len + self.lsr_q12_len)
+        arc2_cond = s > self.lsr_turn1.len + self.lsr_q12_len
+
+        # arc 1
+        arc1 = self.lsr_turn1.state(s[arc1_cond])
+        x[arc1_cond] = arc1.x
+        y[arc1_cond] = arc1.y
+        theta[arc1_cond] = arc1.theta
+        kappa[arc1_cond] = arc1.kappa
+
+        # straight segment:
+        straight = self._state_straight(s[straight_cond])
+        x[straight_cond] = straight.x
+        y[straight_cond] = straight.y
+        theta[straight_cond] = straight.theta
+        kappa[straight_cond] = straight.kappa
+
+        # arc 2
+        arc2 = self._state_turn2(s[arc2_cond])
+        x[arc2_cond] = arc2.x
+        y[arc2_cond] = arc2.y
+        theta[arc2_cond] = arc2.theta
+        kappa[arc2_cond] = arc2.kappa
+
+        return State(x, y, theta, kappa)
