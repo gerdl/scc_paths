@@ -2,6 +2,7 @@
     Copyright: Gerd Gruenert, 2017
     All rights reserved.
 """
+import random
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +17,9 @@ from traject.scc.turn import Turn
 from traject.scc.turnparams import TurnParams
 
 
-DELTA = 1.7
+DELTA = random.uniform(-2*math.pi, 2*math.pi)
+# DELTA = -1.5
+print("This delta is "+str(DELTA))
 
 # Create a new subplot from a grid of 3x3
 gs = GridSpec(3, 3)
@@ -50,9 +53,10 @@ tra = turn._state_clothoid_first(X)
 ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
 
 # plot circle arc segment:
-X2 = np.linspace(tparam.len_clothoid_part, tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
-tra = turn._state_circular(X2)
-ax0.plot(tra.x, tra.y, color="cyan", linewidth=2.0, linestyle="-")
+if turn.delta > tparam.delta_min:
+    X2 = np.linspace(tparam.len_clothoid_part, tparam.len_clothoid_part+turn.len_of_circular_part, 128, endpoint=True)
+    tra = turn._state_circular(X2)
+    ax0.plot(tra.x, tra.y, color="cyan", linewidth=2.0, linestyle="-")
 
 # plot qi point:
 ax0.plot(turn.state_qi.x, turn.state_qi.y, "go")
@@ -78,10 +82,16 @@ ax0.set_yticks(np.linspace(-4, 4, 9, endpoint=True))
 # -----------------------------------
 # plot whole line
 XT = np.linspace(0, turn.len, 128, endpoint=True)
+# turn = Turn(tparam, DELTA)
 tra = turn.state(XT)
+ax1.plot(XT, tra.x, color="green", linewidth=1.0, linestyle="-", label="x")
+ax1.plot(XT, tra.y, color="blue", linewidth=1.0, linestyle="-", label="y")
 ax1.plot(XT, tra.theta, color="black", linewidth=1.0, linestyle="-", label="theta")
 ax1.plot(XT, tra.kappa, color="red", linewidth=1.0, linestyle="-", label="kappa")
 ax1.legend()
+
+# plot again to chaeck we didn't accidentally change something
+# ax0.plot(tra.x, tra.y, color="cyan", linewidth=5.0, linestyle="-")
 
 
 # Show result on screen

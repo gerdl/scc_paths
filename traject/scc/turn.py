@@ -270,10 +270,7 @@ class Turn(object):
     def state_qi(self):
         """Where the first clothoid intersects the inner circle (l/r-turn)"""
         st = self.params.state_qi
-        st.y *= self.dir
-        st.theta *= self.dir
-        st.kappa *= self.dir
-        return st
+        return State(st.x, st.y*self.dir, st.theta*self.dir, st.kappa*self.dir)
 
     @cached_property
     def _state_qj(self):
@@ -290,19 +287,13 @@ class Turn(object):
     def state_qj(self):
         """Where the inner circle segment intersects the second clothoid (l/r-turn)"""
         st = self._state_qj
-        st.y *= self.dir
-        st.theta *= self.dir
-        st.kappa *= self.dir
-        return st
+        return State(st.x, st.y*self.dir, st.theta*self.dir, st.kappa*self.dir)
 
     @cached_property
     def state_qg(self):
         """The end of the second clothoid (turn left | right for dir=1 | -1)"""
         st = self._state_qg
-        st.y *= self.dir
-        st.theta *= self.dir
-        st.kappa *= self.dir
-        return st
+        return State(st.x, st.y*self.dir, st.theta*self.dir, st.kappa*self.dir)
 
     @cached_property
     def _state_qg(self):
