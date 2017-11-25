@@ -20,4 +20,4 @@
 from traject.scc.state import State
 from traject.scc.turnparams import TurnParams
 from traject.scc.turn import Turn
-from traject.scc.connection import Connection
+from traject.scc.scc_path_variant import SccPathVariant
