@@ -25,9 +25,10 @@ ax0 = fig.add_subplot(gs[:, :])
 ax0.set_label("x-y")
 
 
-XPOS = random.uniform(0, 10)
-YPOS = random.uniform(0, 10)
-ANG  = 0 # random.uniform(-math.pi, math.pi)
+XPOS = random.uniform(-10, 10)
+YPOS = random.uniform(-10, 10)
+ANG  = random.uniform(-math.pi, math.pi)
+print(" ANG="+str(ANG))
 
 pos1 = State(0, 0, 0, 0)
 pos2 = State(XPOS, YPOS, ANG, 0)
@@ -58,10 +59,9 @@ ax0.text(sccp.om2l[0], sccp.om2l[1], "om2l")
 
 
 # Set x limits, ticks, etc.
-ax0.set_xlim(-2.0, XPOS+2)
-ax0.set_ylim(-2.0, YPOS+2)
+#ax0.set_xlim(-2.0, XPOS+2)
+#ax0.set_ylim(-2.0, YPOS+2)
 
-#turn = Turn(tparam, sccp.lsr_alpha2 + sccp.lsr_om12_ang)
 # plot first arc
 X = np.linspace(0, sccp.lsr_turn1.len, 128, endpoint=True)
 tra = sccp.lsr_turn1.state(X)
@@ -77,8 +77,12 @@ qg1 = sccp.lsr_q1
 qg2 = sccp.lsr_q2
 ax0.add_line(Line2D([qg1.x, qg2.x], [qg1.y, qg2.y]))
 
+# plot pos2:
+ax0.plot(pos2.x, pos2.y, "bx")
+
+print("lsr_om12_ang: "+str(sccp.lsr_om12_ang))
+print("turn2_ang: "+str(sccp.turn2_ang))
 
 # Show result on screen
 plt.show()
 
-print("Foo")

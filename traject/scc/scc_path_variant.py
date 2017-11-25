@@ -41,6 +41,8 @@ class SccPathVariant(object):
         self.st2 = st2
         self.params = params
 
+        assert(self.lsr_om12_dist > 2*self.params.outer_rad)
+
     def lsr(self, s):
 
         # om1 = left turn
@@ -111,11 +113,13 @@ class SccPathVariant(object):
 
     @cached_property
     def turn1_ang(self):
-        return self.lsr_q12_ang - self.st1.theta
+        ang = self.lsr_q12_ang - self.st1.theta
+        return ang % (2*math.pi)        # make angle positive
 
     @cached_property
     def turn2_ang(self):
-        return self.lsr_q12_ang - self.st2.theta       # going backwards!
+        ang = self.lsr_q12_ang - self.st2.theta
+        return ang % (2*math.pi)        # going backwards, make it positive
 
     @cached_property
     def lsr_turn1(self):
@@ -135,7 +139,7 @@ class SccPathVariant(object):
 
     @cached_property
     def lsr_q2(self):
-        qg2 = self.lsr_turn1.state_qg.rotate_then_translate(self.st2.theta+math.pi, self.st2.x, self.st2.y)
+        qg2 = self.lsr_turn2.state_qg.rotate_then_translate(self.st2.theta+math.pi, self.st2.x, self.st2.y)
         return qg2
 
     def state_turn2(self, s):
