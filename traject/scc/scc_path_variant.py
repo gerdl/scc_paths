@@ -14,7 +14,8 @@ from .turnparams import TurnParams
 from enum import Enum
 import numpy as np
 
-class SccType(Enum):
+
+class PathType(Enum):
     lsl = 1,
     rsr = 2,
     lsr = 3,
@@ -28,7 +29,7 @@ class SccPathVariant(object):
     Turn types:
         lsl, rsr, lsr, rsl, rlr, lrl
     """
-    def __init__(self, params, st1, st2):
+    def __init__(self, params, st1, st2, ptype):
         """
 
         Parameters
@@ -36,20 +37,15 @@ class SccPathVariant(object):
         st1 : State
         st2 : State
         params : TurnParams
+        ptype : PathType
+            The path type
         """
         self.st1 = st1
         self.st2 = st2
         self.params = params
+        self.ptype = ptype
 
-        assert(self.lsr_om12_dist > 2*self.params.outer_rad)
-
-    def lsr(self, s):
-
-        # om1 = left turn
-        om1 = self.params.omega
-
-        # om1 = right turn
-        om2 = self.params.omega_r
+        assert(self.om12_dist > 2 * self.params.outer_rad)
 
     @cached_property
     def om1l(self):
@@ -88,28 +84,46 @@ class SccPathVariant(object):
         return st.x, st.y
 
     @cached_property
-    def lsr_om12_dist(self):
-        dx = self.om2r[0] - self.om1l[0]
-        dy = self.om2r[1] - self.om1l[1]
+    def om1(self):
+        if self.ptype in [PathType.lsl, PathType.lsr, PathType.lrl]:
+            return self.om1l
+        else:
+            return self.om1r
+
+    @cached_property
+    def om2(self):
+        if self.ptype in [PathType.lsl, PathType.rsl, PathType.lrl]:
+            return self.om2l
+        else:
+            return self.om2r
+
+    @cached_property
+    def om12_dist(self):
+        dx = self.om2[0] - self.om1[0]
+        dy = self.om2[1] - self.om1[1]
         dist = math.sqrt(dx**2 + dy**2)
         return dist
 
     @cached_property
-    def lsr_om12_ang(self):
-        dx = self.om2r[0] - self.om1l[0]
-        dy = self.om2r[1] - self.om1l[1]
+    def om12_ang(self):
+        dx = self.om2[0] - self.om1[0]
+        dy = self.om2[1] - self.om1[1]
         return calc_ang(dx, dy)
 
     @cached_property
-    def lsr_alpha2(self):
+    def alpha2(self):
         gamma = self.params.gamma
         rt = self.params.outer_rad
-        alpha2 = math.asin(2 * math.cos(gamma) * rt / self.lsr_om12_dist)
+        alpha2 = math.asin(2 * math.cos(gamma) * rt / self.om12_dist)
         return alpha2
 
     @cached_property
-    def lsr_q12_ang(self):
-        return self.lsr_om12_ang + self.lsr_alpha2
+    def q12_ang(self):
+
+        if self.ptype in [PathType.lsr, PathType.rsl]:
+            return self.om12_ang + self.alpha2
+        elif self.ptype in [PathType.lsl, PathType.rsr]:
+            return self.om12_ang
 
     @cached_property
     def lsr_q12_len(self):
@@ -119,12 +133,12 @@ class SccPathVariant(object):
 
     @cached_property
     def turn1_ang(self):
-        ang = self.lsr_q12_ang - self.st1.theta
+        ang = self.q12_ang - self.st1.theta
         return ang % (2*math.pi)        # make angle positive
 
     @cached_property
     def turn2_ang(self):
-        ang = self.lsr_q12_ang - self.st2.theta
+        ang = self.q12_ang - self.st2.theta
         return ang % (2*math.pi)        # going backwards, make it positive
 
     @cached_property
