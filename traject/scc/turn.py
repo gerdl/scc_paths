@@ -241,9 +241,9 @@ class Turn(object):
         ssa_csa = scipy.special.fresnel(my_s * math.sqrt(self._sigma_smalldelta / math.pi))
 
         # a right-curve now:
-        theta = math.pi - (s * s) * self._sigma_smalldelta * 0.5
+        theta = -(my_s * my_s) * self._sigma_smalldelta * 0.5
 
-        kappa = s * self._sigma_smalldelta
+        kappa = my_s * self._sigma_smalldelta
 
         st = State(-scale * ssa_csa[1], scale * ssa_csa[0], theta, kappa)
         st = st.rotate_then_translate(self.delta, self.state_qg.x, self.state_qg.y)
