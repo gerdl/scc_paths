@@ -165,7 +165,7 @@ class SccPathVariant(object):
             return ang % (2*math.pi) - 2*math.pi        # left turn: make angle negative
 
     @cached_property
-    def turn1(self):
+    def _turn1(self):
         """ get the Turn object for the first turn
         Returns
         -------
@@ -182,7 +182,7 @@ class SccPathVariant(object):
 
     @cached_property
     def q1(self):
-        qg1 = self.turn1.state_qg.rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
+        qg1 = self._turn1.state_qg.rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         return qg1
 
     @cached_property
@@ -202,7 +202,7 @@ class SccPathVariant(object):
 
     def _state_straight(self, s):
         # map s from [len_arc1 .. len_arc1+lsr_q12_len] to [0 .. 1]
-        my_s = (s - self.turn1.len) / self.q12_len
+        my_s = (s - self._turn1.len) / self.q12_len
         dx = self.q2.x - self.q1.x
         dy = self.q2.y - self.q1.y
 
@@ -215,21 +215,34 @@ class SccPathVariant(object):
 
     @cached_property
     def len(self):
-        return self.turn1.len + self._turn2.len + self.q12_len
+        return self._turn1.len + self._turn2.len + self.q12_len
 
     def state(self, s):
+        """
+        Compute
+
+        Parameters
+        ----------
+        s: numpy.array
+
+        Returns
+        -------
+        State
+
+        """
         x = np.empty(len(s))
         y = np.empty(len(s))
         theta = np.empty(len(s))
         kappa = np.empty(len(s))
 
-        arc1_cond = s < self.turn1.len
-        straight_cond = (s > self.turn1.len) & \
-                        (s < self.turn1.len + self.q12_len)
-        arc2_cond = s > self.turn1.len + self.q12_len
+        arc1_cond = s < self._turn1.len
+        straight_cond = (s > self._turn1.len) & \
+                        (s < self._turn1.len + self.q12_len)
+        arc2_cond = s > self._turn1.len + self.q12_len
 
         # arc 1
-        arc1 = self.turn1.state(s[arc1_cond])
+        arc1 = self._turn1.state(s[arc1_cond])
+        arc1 = arc1.rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         x[arc1_cond] = arc1.x
         y[arc1_cond] = arc1.y
         theta[arc1_cond] = arc1.theta

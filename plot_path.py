@@ -39,17 +39,27 @@ ax1 = fig.add_subplot(gs[-1, :])
 ax1.set_label("s-theta")
 
 
-XPOS = random.uniform(-10, 10)
-YPOS = random.uniform(-10, 10)
-ANG  = random.uniform(-math.pi, math.pi)
+XPOS1 = random.uniform(-10, 10)
+YPOS1 = random.uniform(-10, 10)
+ANG1  = random.uniform(-math.pi, math.pi)
+XPOS2 = random.uniform(-10, 10)
+YPOS2 = random.uniform(-10, 10)
+ANG2  = random.uniform(-math.pi, math.pi)
 PATHOPTIONS = [PathType.lsl, PathType.rsr, PathType.rsl, PathType.lsr]
-#PATHOPTIONS = [PathType.rsl]
 
-print(" ANG="+str(ANG))
+#KAPPA_MAX = random.uniform(0.1, 5)
+#SIGMA_MAX = random.uniform(0.1, 5)
+KAPPA_MAX = SIGMA_MAX = 1
 
-pos1 = State(0, 0, 0, 0)
-pos2 = State(XPOS, YPOS, ANG, 0)
-tparam = TurnParams(1.0, 1.0)
+
+print("  ANG1      = " + str(ANG1))
+print("  ANG2      = " + str(ANG2))
+print("  KAPPA_MAX = " + str(KAPPA_MAX))
+print("  SIGMA_MAX = " + str(SIGMA_MAX))
+
+pos1 = State(XPOS1, YPOS1, ANG1, 0)
+pos2 = State(XPOS2, YPOS2, ANG2, 0)
+tparam = TurnParams(KAPPA_MAX, SIGMA_MAX)
 
 paths = [SccPathVariant(tparam, pos1, pos2, variant) for variant in
          PATHOPTIONS]
