@@ -119,32 +119,41 @@ class SccPathVariant(object):
 
     @cached_property
     def q12_ang(self):
-
-        if self.ptype in [PathType.lsr, PathType.rsl]:
+        if self.ptype == PathType.rsl:
+            return self.om12_ang - self.alpha2
+        elif self.ptype == PathType.lsr:
             return self.om12_ang + self.alpha2
         elif self.ptype in [PathType.lsl, PathType.rsr]:
             return self.om12_ang
+        return None
 
     @cached_property
-    def lsr_q12_len(self):
-        dx = self.lsr_q2.x - self.lsr_q1.x
-        dy = self.lsr_q2.y - self.lsr_q1.y
+    def q12_len(self):
+        dx = self.q2.x - self.q1.x
+        dy = self.q2.y - self.q1.y
         return math.sqrt(dx*dx + dy*dy)
 
     @cached_property
     def turn1_ang(self):
         ang = self.q12_ang - self.st1.theta
-        return ang % (2*math.pi)        # make angle positive
+        if self.ptype in [PathType.lsl, PathType.lsr, PathType.lrl]:
+            return ang % (2*math.pi)                    # left turn: make angle positive
+        else:
+            return ang % (2*math.pi) - 2*math.pi        # right turn: make angle negative
 
     @cached_property
     def turn2_ang(self):
+        """The direction of the second turn should be considered from the rear end,
+           such that a positive turn angle makes a right turn!"""
         ang = self.q12_ang - self.st2.theta
-        return ang % (2*math.pi)        # going backwards, make it positive
+        if self.ptype in [PathType.lsr, PathType.rsr, PathType.rlr]:
+            return ang % (2*math.pi)                    # right turn: make angle positive
+        else:
+            return ang % (2*math.pi) - 2*math.pi        # left turn: make angle negative
 
     @cached_property
-    def lsr_turn1(self):
-        """
-
+    def turn1(self):
+        """ get the Turn object for the first turn
         Returns
         -------
         Turn
@@ -152,44 +161,43 @@ class SccPathVariant(object):
         return Turn(self.params, self.turn1_ang)
 
     @cached_property
-    def _lsr_turn2(self):
+    def _turn2(self):
         """
-        maybe shouldn't be used directly - not yet translated and turned!
+        The second turn will be used from the rear end!
         """
         return Turn(self.params, self.turn2_ang)
 
     @cached_property
-    def lsr_q1(self):
-        qg1 = self.lsr_turn1.state_qg
+    def q1(self):
+        qg1 = self.turn1.state_qg.rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         return qg1
 
     @cached_property
-    def lsr_q2(self):
-        qg2 = self._lsr_turn2.state_qg.rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+    def q2(self):
+        qg2 = self._turn2.state_qg.rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
         return qg2
 
     def _state_turn2(self, s):
-
         # map s from [len_total-len_arc2 .. len_total] to [len_arc2 .. 0]
         my_s = - (s - self.len)
-        return self._lsr_turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+        return self._turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
 
     def _state_straight(self, s):
         # map s from [len_arc1 .. len_arc1+lsr_q12_len] to [0 .. 1]
-        my_s = (s - self.lsr_turn1.len) / self.lsr_q12_len
-        dx = self.lsr_q2.x - self.lsr_q1.x
-        dy = self.lsr_q2.y - self.lsr_q1.y
+        my_s = (s - self.turn1.len) / self.q12_len
+        dx = self.q2.x - self.q1.x
+        dy = self.q2.y - self.q1.y
 
-        x = self.lsr_q1.x + dx * my_s
-        y = self.lsr_q1.y + dy * my_s
-        theta = np.full(len(s), self.lsr_q1.theta)
+        x = self.q1.x + dx * my_s
+        y = self.q1.y + dy * my_s
+        theta = np.full(len(s), self.q1.theta)
         kappa = np.zeros(len(s))
 
         return State(x, y, theta, kappa)
 
     @cached_property
     def len(self):
-        return self.lsr_turn1.len + self._lsr_turn2.len + self.lsr_q12_len
+        return self.turn1.len + self._turn2.len + self.q12_len
 
     def state(self, s):
         x = np.empty(len(s))
@@ -197,13 +205,13 @@ class SccPathVariant(object):
         theta = np.empty(len(s))
         kappa = np.empty(len(s))
 
-        arc1_cond = s < self.lsr_turn1.len
-        straight_cond = (s > self.lsr_turn1.len) & \
-                        (s < self.lsr_turn1.len + self.lsr_q12_len)
-        arc2_cond = s > self.lsr_turn1.len + self.lsr_q12_len
+        arc1_cond = s < self.turn1.len
+        straight_cond = (s > self.turn1.len) & \
+                        (s < self.turn1.len + self.q12_len)
+        arc2_cond = s > self.turn1.len + self.q12_len
 
         # arc 1
-        arc1 = self.lsr_turn1.state(s[arc1_cond])
+        arc1 = self.turn1.state(s[arc1_cond])
         x[arc1_cond] = arc1.x
         y[arc1_cond] = arc1.y
         theta[arc1_cond] = arc1.theta
