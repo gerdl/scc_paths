@@ -193,7 +193,12 @@ class SccPathVariant(object):
     def _state_turn2(self, s):
         # map s from [len_total-len_arc2 .. len_total] to [len_arc2 .. 0]
         my_s = - (s - self.len)
-        return self._turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+        st = self._turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
+
+        # this path segment was calculated from the rear end:
+        st.theta += - self.st2.theta - math.pi + self.q12_ang - self.turn2_ang
+        st.kappa *= -1
+        return st
 
     def _state_straight(self, s):
         # map s from [len_arc1 .. len_arc1+lsr_q12_len] to [0 .. 1]
@@ -203,7 +208,7 @@ class SccPathVariant(object):
 
         x = self.q1.x + dx * my_s
         y = self.q1.y + dy * my_s
-        theta = np.full(len(s), self.q1.theta)
+        theta = np.full(len(s), self.q12_ang)
         kappa = np.zeros(len(s))
 
         return State(x, y, theta, kappa)
@@ -243,5 +248,7 @@ class SccPathVariant(object):
         y[arc2_cond] = arc2.y
         theta[arc2_cond] = arc2.theta
         kappa[arc2_cond] = arc2.kappa
+
+        theta %= 2*math.pi  # show theta angle between 0 and 2*pi
 
         return State(x, y, theta, kappa)

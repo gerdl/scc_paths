@@ -32,7 +32,7 @@ class State(object):
         sa = math.sin(alpha)
         x = self.x * ca - self.y * sa + dx
         y = self.x * sa + self.y * ca + dy
-        th = self.theta + alpha
+        th = (self.theta + alpha) % (2*math.pi)
         return State(x, y, th, self.kappa)
 
     # so far, nobody uses this:

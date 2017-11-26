@@ -111,7 +111,10 @@ class Turn(object):
             theta[second_smalldelta_cond] = second_clotho.theta
             kappa[second_smalldelta_cond] = second_clotho.kappa
 
-        return State(x, self.dir * y, self.dir * theta, self.dir * kappa)
+        theta *= self.dir
+        theta %= 2*math.pi  # show theta angle between 0 and 2*pi
+
+        return State(x, self.dir * y, theta, self.dir * kappa)
 
     def _state_circular(self, s):
         """
@@ -314,5 +317,4 @@ class Turn(object):
         st = State(-self.params.omega[0], -self.params.omega[1], self.delta, 0)
         st = st.rotate_then_translate(self.delta + 2 * self.params.gamma, self.params.omega[0], self.params.omega[1])
 
-        return st
-
+        return State(st.x, st.y, self.delta, 0)
