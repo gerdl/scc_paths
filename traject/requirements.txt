@@ -1,2 +1,4 @@
 property-manager
 scipy
+numpy
+matplotlib
