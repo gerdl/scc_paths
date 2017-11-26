@@ -17,17 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 import math
 
+import numpy as np
+import scipy.special
 from property_manager import cached_property
 
-import scipy.special
-import numpy as np
-
-
-from traject.scc import State
-from traject.scc import TurnParams
+from scc import State
+from scc import TurnParams
 
 
 class Turn(object):

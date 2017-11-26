@@ -17,18 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
-import math
-
-# Create a figure of size 8x6 inches, 80 dots per inch
-import scipy.special
+import numpy as np
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
-
-from traject.scc.turnparams import TurnParams
 from traject.scc.turn import Turn
 
+from scc.turnparams import TurnParams
 
 # Create a new subplot from a grid of 3x3
 gs = GridSpec(3, 3)

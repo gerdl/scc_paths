@@ -17,16 +17,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import math
+from enum import Enum
 
+import numpy as np
 from property_manager import cached_property
 
-from traject.scc import Turn
-from traject.scc.helpers import calc_ang
+from scc import Turn
+from scc.helpers import calc_ang
 from .state import State
 from .turnparams import TurnParams
-
-from enum import Enum
-import numpy as np
 
 
 class PathType(Enum):

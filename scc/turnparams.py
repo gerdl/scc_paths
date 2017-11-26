@@ -20,7 +20,7 @@ from property_manager import cached_property
 import scipy.special
 import math
 
-from . import State
+from scc import State
 
 
 class TurnParams(object):

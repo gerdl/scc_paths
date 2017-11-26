@@ -12,3 +12,4 @@ Required Development
 ### Missing Features ###
 
 - lrl and rlr paths for short distances!
+- add setup.py to install via pip
