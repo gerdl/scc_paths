@@ -27,8 +27,12 @@ from scc.turn import Turn
 
 from scc.turnparams import TurnParams
 
+KAPPA_MAX = random.uniform(0.1, 5)
+SIGMA_MAX = random.uniform(0.1, 5)
 DELTA = random.uniform(-2*math.pi, 2*math.pi)
-print("This delta is "+str(DELTA))
+print("  DELTA is     "+str(DELTA))
+print("  KAPPA_MAX is "+str(KAPPA_MAX))
+print("  SIGMA_MAX is "+str(SIGMA_MAX))
 
 # Create a new subplot from a grid of 3x3
 gs = GridSpec(3, 3)
@@ -40,7 +44,7 @@ ax1 = fig.add_subplot(gs[-1, :])
 ax1.set_label("s-theta")
 
 
-tparam = TurnParams(1.0, 1.0)
+tparam = TurnParams(KAPPA_MAX, SIGMA_MAX)
 turn = Turn(tparam, DELTA)
 
 # plot outer circle:
@@ -82,10 +86,10 @@ tra = turn._state_clothoid_second(X3)
 ax0.plot(tra.x, tra.y, color="red", linewidth=1.0, linestyle="-")
 
 # Set x limits, ticks, etc.
-ax0.set_xlim(-4.0, 4.0)
-ax0.set_xticks(np.linspace(-4, 4, 9, endpoint=True))
-ax0.set_ylim(-4.0, 4.0)
-ax0.set_yticks(np.linspace(-4, 4, 9, endpoint=True))
+#ax0.set_xlim(-4.0, 4.0)
+#ax0.set_xticks(np.linspace(-4, 4, 9, endpoint=True))
+#ax0.set_ylim(-4.0, 4.0)
+#ax0.set_yticks(np.linspace(-4, 4, 9, endpoint=True))
 
 
 # -----------------------------------

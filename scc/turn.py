@@ -153,10 +153,11 @@ class Turn(object):
 
         scale = math.sqrt(math.pi / self.params.sigma_max)
 
-        ssa_csa = scipy.special.fresnel(s * math.sqrt(1 / (self.params.delta_min * math.pi)))
+        # s goes from 0 .. self.params.len_clothoid_part = 0 .. kappa_max / sigma_max
+        ssa_csa = scipy.special.fresnel(s * math.sqrt(self.params.sigma_max / math.pi))
 
         # theta changes quadratically with s
-        theta = (s*s)/(2*self.params.delta_min)
+        theta = 0.5 * self.params.sigma_max * (s*s)
 
         # curvature changes linear until reaching kappa_max for s=len_clothoid_part
         kappa = s/self.params.len_clothoid_part * self.params.kappa_max
@@ -178,10 +179,10 @@ class Turn(object):
         # NOTE: Mathematically, these brackets are nonsense, but in the numpy.array sense, they are absolutely necessary
         inv_clothoid_s = (2 * self.params.len_clothoid_part + self.len_of_circular_part) - s
 
-        ssa_csa = scipy.special.fresnel(inv_clothoid_s * math.sqrt(1 / (self.params.delta_min * math.pi)))
+        ssa_csa = scipy.special.fresnel(inv_clothoid_s * math.sqrt(self.params.sigma_max / math.pi))
 
         # theta changes quadratically with s
-        theta = - inv_clothoid_s * inv_clothoid_s / (2 * self.params.delta_min)
+        theta = - 0.5 * (inv_clothoid_s * inv_clothoid_s) * self.params.sigma_max
 
         # curvature changes linear until reaching kappa_max for s=len_clothoid_part
         kappa = inv_clothoid_s / self.params.len_clothoid_part * self.params.kappa_max
