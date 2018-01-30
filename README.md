@@ -101,3 +101,15 @@ print (tra.y)
 Or more complete: `plot_path.py`
 
 ![alt text](example_images/plot_path.png?raw=true "paths")
+
+
+TODOs
+=====
+
+* improve documentation
+* Add support for the case of: om12_dist <= 2 * self.params.outer_rad.
+    I.e., when the centers of the two circles are very close together!
+    (PathType.lrl, PathType.rlr)
+* Add unit tests
+* add setup.py to install via pip
+
