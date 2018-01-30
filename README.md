@@ -69,7 +69,7 @@ print (tra.y)
 
 Or more complete: `plot_curve.py`
 
-![alt text][example_images/plot_curve.png]
+![alt text](example_images/plot_curve.png?raw=true "curve")
 
 
 Example use - Scc Path
@@ -100,4 +100,4 @@ print (tra.y)
 
 Or more complete: `plot_path.py`
 
-![alt text][example_images/plot_path.png]
+![alt text](example_images/plot_path.png?raw=true "paths")
