@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
-from traject.scc.turn import Turn
+from scc.turn import Turn
 
 from scc.turnparams import TurnParams
 

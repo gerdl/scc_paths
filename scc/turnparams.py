@@ -47,6 +47,7 @@ class TurnParams(object):
 
     @cached_property
     def outer_rad(self):
+        """The radius of the outer circle, encapsulating the turn"""
         return math.sqrt(self.omega[0] * self.omega[0] + self.omega[1] * self.omega[1])
 
     @cached_property

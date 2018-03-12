@@ -82,25 +82,25 @@ tra = shortest_path.state(X)
 ax0.plot(tra.x, tra.y, color="green", linewidth=1.0, linestyle="--")
 
 # omil
-ax0.add_patch(Circle(shortest_path.om1l, tparam.outer_rad, facecolor='none', edgecolor='black'))
-ax0.add_patch(Circle(shortest_path.om1l, tparam.inner_rad, facecolor='none', edgecolor='black'))
-ax0.plot(shortest_path.om1l[0], shortest_path.om1l[1], "go")
-ax0.text(shortest_path.om1l[0], shortest_path.om1l[1], "om1l")
+ax0.add_patch(Circle(shortest_path._om1l, tparam.outer_rad, facecolor='none', edgecolor='black'))
+ax0.add_patch(Circle(shortest_path._om1l, tparam.inner_rad, facecolor='none', edgecolor='black'))
+ax0.plot(shortest_path._om1l[0], shortest_path._om1l[1], "go")
+ax0.text(shortest_path._om1l[0], shortest_path._om1l[1], "om1l")
 # omir
 #ax0.add_patch(Circle(sccp.om1r, tparam.outer_rad, facecolor='none', edgecolor='black'))
 #ax0.add_patch(Circle(sccp.om1r, tparam.inner_rad, facecolor='none', edgecolor='black'))
-ax0.plot(shortest_path.om1r[0], shortest_path.om1r[1], "go")
-ax0.text(shortest_path.om1r[0], shortest_path.om1r[1], "om1r")
+ax0.plot(shortest_path._om1r[0], shortest_path._om1r[1], "go")
+ax0.text(shortest_path._om1r[0], shortest_path._om1r[1], "om1r")
 
 
 # om2r
-ax0.add_patch(Circle(shortest_path.om2r, tparam.outer_rad, facecolor='none', edgecolor='black'))
-ax0.add_patch(Circle(shortest_path.om2r, tparam.inner_rad, facecolor='none', edgecolor='black'))
-ax0.plot(shortest_path.om2r[0], shortest_path.om2r[1], "go")
-ax0.text(shortest_path.om2r[0], shortest_path.om2r[1], "om2r")
+ax0.add_patch(Circle(shortest_path._om2r, tparam.outer_rad, facecolor='none', edgecolor='black'))
+ax0.add_patch(Circle(shortest_path._om2r, tparam.inner_rad, facecolor='none', edgecolor='black'))
+ax0.plot(shortest_path._om2r[0], shortest_path._om2r[1], "go")
+ax0.text(shortest_path._om2r[0], shortest_path._om2r[1], "om2r")
 # om2l
-ax0.plot(shortest_path.om2l[0], shortest_path.om2l[1], "go")
-ax0.text(shortest_path.om2l[0], shortest_path.om2l[1], "om2l")
+ax0.plot(shortest_path._om2l[0], shortest_path._om2l[1], "go")
+ax0.text(shortest_path._om2l[0], shortest_path._om2l[1], "om2l")
 
 # connection line:
 qg1 = shortest_path.q1
@@ -112,7 +112,7 @@ ax0.plot(pos1.x, pos1.y, "bo")
 # plot pos2:
 ax0.plot(pos2.x, pos2.y, "bx")
 
-print("lsr_om12_ang: " + str(shortest_path.om12_ang))
+print("lsr_om12_ang: " + str(shortest_path._om12_ang))
 print("turn2_ang: " + str(shortest_path.turn2_ang))
 
 # plot theta, kappa:

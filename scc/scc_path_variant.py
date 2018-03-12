@@ -36,12 +36,15 @@ class PathType(Enum):
     rlr = 5,
     lrl = 6
 
+ALL_PATHOPTIONS = [PathType.lsl, PathType.rsr, PathType.rsl, PathType.lsr]
+
 
 class SccPathVariant(object):
     """
     Turn types:
         lsl, rsr, lsr, rsl, rlr, lrl
     """
+
     def __init__(self, params, st1, st2, ptype):
         """
 
@@ -61,21 +64,21 @@ class SccPathVariant(object):
         assert(self.om12_dist > 2 * self.params.outer_rad)
 
     @cached_property
-    def om1l(self):
+    def _om1l(self):
         """Omega_1, for a left turn"""
         om = self.params.omega
         st = State(om[0], om[1], 0, 0).rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         return st.x, st.y
 
     @cached_property
-    def om1r(self):
+    def _om1r(self):
         """Omega_1, for a right turn"""
         om = self.params.omega
         st = State(om[0], -om[1], 0, 0).rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         return st.x, st.y
 
     @cached_property
-    def om2r(self):
+    def _om2r(self):
         """Omega_2, for a right turn"""
 
         # starting from the other end, it's a left turn, too:
@@ -86,7 +89,7 @@ class SccPathVariant(object):
         return st.x, st.y
 
     @cached_property
-    def om2l(self):
+    def _om2l(self):
         """Omega_2, for a left turn"""
 
         # starting from the other end, it's a right turn, too:
@@ -98,17 +101,19 @@ class SccPathVariant(object):
 
     @cached_property
     def om1(self):
+        """The position of the first turn"""
         if self.ptype in [PathType.lsl, PathType.lsr, PathType.lrl]:
-            return self.om1l
+            return self._om1l
         else:
-            return self.om1r
+            return self._om1r
 
     @cached_property
     def om2(self):
+        """The position of the second turn"""
         if self.ptype in [PathType.lsl, PathType.rsl, PathType.lrl]:
-            return self.om2l
+            return self._om2l
         else:
-            return self.om2r
+            return self._om2r
 
     @cached_property
     def om12_dist(self):
@@ -118,37 +123,37 @@ class SccPathVariant(object):
         return dist
 
     @cached_property
-    def om12_ang(self):
+    def _om12_ang(self):
         dx = self.om2[0] - self.om1[0]
         dy = self.om2[1] - self.om1[1]
         return calc_ang(dx, dy)
 
     @cached_property
-    def alpha2(self):
+    def _alpha2(self):
         gamma = self.params.gamma
         rt = self.params.outer_rad
         alpha2 = math.asin(2 * math.cos(gamma) * rt / self.om12_dist)
         return alpha2
 
     @cached_property
-    def q12_ang(self):
+    def _q12_ang(self):
         if self.ptype == PathType.rsl:
-            return self.om12_ang - self.alpha2
+            return self._om12_ang - self._alpha2
         elif self.ptype == PathType.lsr:
-            return self.om12_ang + self.alpha2
+            return self._om12_ang + self._alpha2
         elif self.ptype in [PathType.lsl, PathType.rsr]:
-            return self.om12_ang
+            return self._om12_ang
         return None
 
     @cached_property
-    def q12_len(self):
+    def _q12_len(self):
         dx = self.q2.x - self.q1.x
         dy = self.q2.y - self.q1.y
         return math.sqrt(dx*dx + dy*dy)
 
     @cached_property
     def turn1_ang(self):
-        ang = self.q12_ang - self.st1.theta
+        ang = self._q12_ang - self.st1.theta
         if self.ptype in [PathType.lsl, PathType.lsr, PathType.lrl]:
             return ang % (2*math.pi)                    # left turn: make angle positive
         else:
@@ -158,7 +163,7 @@ class SccPathVariant(object):
     def turn2_ang(self):
         """The direction of the second turn should be considered from the rear end,
            such that a positive turn angle makes a right turn!"""
-        ang = self.q12_ang - self.st2.theta
+        ang = self._q12_ang - self.st2.theta
         if self.ptype in [PathType.lsr, PathType.rsr, PathType.rlr]:
             return ang % (2*math.pi)                    # right turn: make angle positive
         else:
@@ -182,11 +187,17 @@ class SccPathVariant(object):
 
     @cached_property
     def q1(self):
+        """
+        Intersection between first turn and straight segment
+        """
         qg1 = self._turn1.state_qg.rotate_then_translate(self.st1.theta, self.st1.x, self.st1.y)
         return qg1
 
     @cached_property
     def q2(self):
+        """
+        Intersection between straight segment and second turn
+        """
         qg2 = self._turn2.state_qg.rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
         return qg2
 
@@ -196,26 +207,26 @@ class SccPathVariant(object):
         st = self._turn2.state(my_s).rotate_then_translate(self.st2.theta + math.pi, self.st2.x, self.st2.y)
 
         # this path segment was calculated from the rear end:
-        st.theta += - self.st2.theta - math.pi + self.q12_ang - self.turn2_ang
+        st.theta += - self.st2.theta - math.pi + self._q12_ang - self.turn2_ang
         st.kappa *= -1
         return st
 
     def _state_straight(self, s):
         # map s from [len_arc1 .. len_arc1+lsr_q12_len] to [0 .. 1]
-        my_s = (s - self._turn1.len) / self.q12_len
+        my_s = (s - self._turn1.len) / self._q12_len
         dx = self.q2.x - self.q1.x
         dy = self.q2.y - self.q1.y
 
         x = self.q1.x + dx * my_s
         y = self.q1.y + dy * my_s
-        theta = np.full(len(s), self.q12_ang)
+        theta = np.full(len(s), self._q12_ang)
         kappa = np.zeros(len(s))
 
         return State(x, y, theta, kappa)
 
     @cached_property
     def len(self):
-        return self._turn1.len + self._turn2.len + self.q12_len
+        return self._turn1.len + self._turn2.len + self._q12_len
 
     def state(self, s):
         """
@@ -237,8 +248,8 @@ class SccPathVariant(object):
 
         arc1_cond = s < self._turn1.len
         straight_cond = (s > self._turn1.len) & \
-                        (s < self._turn1.len + self.q12_len)
-        arc2_cond = s > self._turn1.len + self.q12_len
+                        (s < self._turn1.len + self._q12_len)
+        arc2_cond = s > self._turn1.len + self._q12_len
 
         # arc 1
         arc1 = self._turn1.state(s[arc1_cond])
